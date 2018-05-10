@@ -15,7 +15,7 @@ Code files and references for data visualization
 
 ### Required R Packages
 - `devtools`
-- `ggplot2`, `plotly`
+- `ggplot2`, `plotly`, `open3d`
 - `dplyr`
 - `RColorBrewer`
 - `treemap` & `treemapify`
