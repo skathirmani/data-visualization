@@ -6,11 +6,17 @@ Code files and references for data visualization
 - [ColorPicker - Colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3)
 
 
+### Links to stay updated
+- [Flowing Data](http://flowingdata.com/)
+- [Information is Beautiful](http://www.informationisbeautiful.net)
+- [Visualising Data](http://www.visualisingdata.com)
+- [Gramener's Data visualization case studies](https://gramener.com/demo/)
 
 ### References
-- [Gramener's Data visualization case studies](https://gramener.com/demo/)
+
 - [Boxplot(Wikipedia)](https://en.wikipedia.org/wiki/Box_plot)
 - [Color pallete cheat sheet in R](https://www.nceas.ucsb.edu/~frazier/RSpatialGuides/colorPaletteCheatsheet.pdf)
+
 
 
 ### Required R Packages
@@ -26,3 +32,6 @@ Code files and references for data visualization
 - `ggmap`
 - `devtools::install_github(“dgrtwo/gganimate”)`
 - `install_github("ujjwalkarn/xda")`
+
+### To be added
+- People to follow
