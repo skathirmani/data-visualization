@@ -1,0 +1,324 @@
+---
+title: "Cricket Analysis"
+author: "Kathirmani Sukumar"
+date: "May 9, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Load data
+Use read.csv to load any csv file
+```{r}
+odi = read.csv('e:/datasets/odi-batting.csv')
+#View(odi)
+class(odi)
+colnames(odi)
+str(odi)
+nrow(odi)
+nlevels(odi$Country)
+levels(odi$Country)
+unique(odi$Country)
+```
+
+### Top ten players based on total runs
+```{r}
+library(dplyr)
+library(ggplot2)
+
+top_players = odi %>% group_by(Player) %>% summarise(total_runs=sum(Runs), avg_runs=mean(Runs)) %>% arrange(-total_runs) %>% head(5)
+top_players
+```
+
+```{r}
+odi %>% group_by(Player) %>% summarise(total_runs=sum(Runs), avg_runs=mean(Runs), matches=n()) %>% arrange(-total_runs) %>% head(5)
+```
+
+
+```{r}
+colnames(odi)
+```
+
+
+```{r}
+odi %>% group_by(Country, Player) %>% summarise(total=n()) %>% arrange(-total) %>% head(5)
+```
+
+
+### Player's Performance
+```{r echo=FALSE}
+odi$Century = ifelse(odi$Runs>99,1,0)
+odi$Ducks = ifelse(odi$Runs==0,1,0)
+odi$Fifty = ifelse(odi$Runs>49&odi$Runs<100,1,0)
+odi$missed_century = ifelse(odi$Runs>90&odi$Runs<100,1,0)
+#View(odi)
+
+player_summary = odi %>% group_by(Player) %>% summarise(Runs=sum(Runs, na.rm=T),
+                                       matches=n(),
+                                       avg_runs=mean(Runs, na.rm=T),
+                                       Century=sum(Century, na.rm=T),
+                                       Ducks=sum(Ducks, na.rm=T),
+                                       Fifties=sum(Fifty, na.rm=T),
+                                       missed_century=sum(missed_century, na.rm=T)
+                                       ) %>% arrange(-Runs)
+player_summary
+#write.csv(player_summary, 'player_summary.csv')
+#getwd()
+```
+- Sachin has most number missed centuries 
+- Jayasuriya has most number of ducks
+
+## Plotting
+```{r}
+library(ggplot2)
+top_players = odi %>% group_by(Player) %>% summarise(total_runs=sum(Runs, na.rm=T)) %>% arrange(-total_runs) %>% head(10)
+
+ggplot(top_players, aes(x=reorder(Player, total_runs), y=total_runs)) + geom_bar(stat='identity', fill='steelblue')
+
+players_plt = ggplot(top_players, aes(x=reorder(Player, total_runs), y=total_runs))
+players_plt = players_plt + geom_bar(stat='identity', fill='steelblue')
+players_plt = players_plt + xlab('Player Name') + ylab('Total Runs') + coord_flip()
+plot(players_plt)
+```
+
+
+```{r}
+odi %>% group_by(Player) %>% summarise(total_runs=sum(Runs, na.rm=T)) %>% arrange(-total_runs) %>% head(10) %>% ggplot(aes(x=Player, y=total_runs))+ geom_bar(stat='identity')
+```
+
+```{r}
+ggplot(odi, aes(x=Country))+geom_bar()
+
+```
+
+## Box plot
+```{r}
+boxplot(odi$Runs)
+```
+
+### Histogram
+```{r}
+hist(odi$Runs)
+```
+### Identify missing values
+```{r}
+sum(is.na(odi$Runs))
+
+colSums(is.na(odi)) / nrow(odi) * 100
+```
+
+### Categorical column
+```{r, fig.width=8, fig.height=4}
+odi %>% group_by(Player) %>% summarise(count=n()) %>% head(10) %>% ggplot(aes(x=Player, y=count))+geom_bar(stat='identity', fill='steelblue') + coord_flip()
+```
+
+### Pareto Analysis
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+library(qcc)
+pareto.chart(table(odi$Country))
+```
+
+## Dates
+- increment dates
+- diff between dates
+- Minimum date that support
+
+```{r}
+odi$date = as.Date(odi$MatchDate, "%m-%d-%Y")
+head(odi$date)
+class(odi$date)
+odi$year = format(odi$date, '%Y')
+odi$month = format(odi$date, '%m')
+odi$month_year = format(odi$date, '%m-%Y')
+odi$weekday = format(odi$date, '%A')
+head(odi$weekday)
+# odi$weekday = weekday(odi$date)
+```
+
+### Word cloud
+```{r warning=FALSE, echo=FALSE}
+library(tm)
+library(wordcloud)
+library(RColorBrewer)
+
+tweets = read.csv('e:/datasets/narendramodi_tweets.csv')
+tweets$text = tolower(tweets$text)
+tweets$text = gsub('[^a-zA-Z0-9#& ]', '', tweets$text)
+row_words = strsplit(tweets$text, split = ' ')
+words = unlist(row_words)
+words_freq = table(words)
+words_freq = as.data.frame(words_freq)
+# colnames(words_freq) = c('WORDS', 'FREQUENCY')
+
+words_freq %>% arrange(-Freq) %>% head(10)
+stop_words = stopwords()
+
+words_freq %>% filter(words == 'modi') # Filter based on one element
+words_freq %>% filter(words %in% c('modi', 'the', 'india')) # Filter based on more than one element
+
+words_freq = words_freq %>% filter(!words %in% stop_words)
+words_freq %>% arrange(-Freq) %>% head(10)
+custom_words = c('amp;', 'rt')
+words_freq = words_freq %>% filter(!words %in% custom_words)
+words_freq %>% arrange(-Freq) %>% head(10)
+wordcloud(words_freq$words,
+          words_freq$Freq,
+          min.freq = 50,
+          colors = brewer.pal(8, "Dark2"),
+          random.color = T,
+          scale = c(10,1)
+          )
+
+
+```
+
+```{r}
+library(RSentiment)
+Sys.setenv(JAVA_HOME='C:/Program Files/Java/jre-9.0.4') # for 64-bit version
+calculate_sentiment(c('I love india. But I hate politics here', 'I hate apple', 'This food is not good'))
+calculate_score(c('I love india. But I hate politics here', 'I hate apple', 'This food is not good'))
+calculate_sentiment(head(tweets$text))
+```
+
+
+```{r}
+library(ggmap)
+geocode('RMZ Ecoworld, Bangalore')
+geocode('India')
+geocode('Bangalore')
+uniq_countries = unique(as.character(odi$Country))
+geocode(c('India', 'Australia', 'Bangalore'))
+countries_geo = geocode(uniq_countries)
+countries_geo
+write.csv(countries_geo, 'locations.csv')
+```
+
+### Bivariate Analysis
+- Numerical vs Numerical
+- Categorical vs Categorical
+- Categorical vs Numerical
+```{r}
+sachin = odi %>% filter(Player %in% c('Sachin R Tendulkar'))
+# sachin = odi %>% filter(Player == 'Sachin R Tendulkar')
+nrow(sachin)
+
+ggplot(sachin, aes(x=Runs, y=ScoreRate)) + geom_point(col='steelblue') + geom_smooth(method='lm', se = F)
+ggplot(sachin, aes(x=Runs, y=ScoreRate)) + geom_point(col='steelblue') + geom_smooth(method='loess', se = F)
+
+odi %>% filter(Player %in% c('Virender Sehwag')) %>% ggplot(aes(x=Runs, y=ScoreRate))+geom_smooth(se=F)
+
+odi %>% filter(Player %in% c('Virender Sehwag', 'Sachin R Tendulkar', 'Ashish Nehra')) %>% ggplot(aes(x=Runs, y=ScoreRate, col=Player))+geom_smooth(se=F)
+
+odi %>% filter(Player %in% c('Virender Sehwag', 'Sachin R Tendulkar', 'Ashish Nehra')) %>% ggplot(aes(x=Runs, y=ScoreRate, col=Player))+geom_point()
+```
+
+
+
+```{r}
+odi %>% filter(Player %in% c('Virender Sehwag', 'Sachin R Tendulkar', 'Ashish Nehra')) %>% ggplot(aes(x=Runs, y=ScoreRate))+geom_point(col='steelblue' )+facet_wrap(~Player)
+```
+
+
+```{r}
+top_players = odi %>% group_by(Player) %>% summarise(centuries=sum(Century, na.rm=T)) %>% arrange(-centuries) %>% head(10)
+
+top_players
+
+odi %>% filter(Player %in% top_players$Player) %>% ggplot(aes(x=Runs, y=ScoreRate))+geom_point(col='steelblue')+facet_wrap(~Player) + geom_smooth()
+```
+
+```{r}
+tweets %>% ggplot(aes(x=favorite_count, y=retweets_count, ))+geom_point()+facet_wrap(~source)
+```
+
+```{r}
+boxplot(tweets$favorite_count)
+```
+### Correlation matrix using corrplot
+```{r}
+library(corrplot)
+
+
+stocks = read.csv('e:/datasets/stock-prices.csv')
+cor_mat = cor(na.omit(stocks %>% select(-Date)))
+cor_mat
+```
+
+```{r}
+corrplot(cor_mat, method='number')
+corrplot(cor_mat, method='color', order = 'hclust', addrect = 2)
+```
+
+```{r}
+na.omit(stocks)
+```
+
+## Categorical vs Numerical
+- Boxplot
+- Group & averages and plot bar charts
+```{r, fig.width=12, fig.height=5}
+hr = read.csv('e:/datasets/ibm-watson/HR Analytics.csv')
+ggplot(hr, aes(x=MaritalStatus, y=MonthlyIncome))+geom_boxplot()+facet_wrap(~JobRole)
+```
+
+
+```{r, fig.width=12}
+sachin %>% group_by(year) %>% summarise(total_runs=sum(Runs, na.rm=T), centuries=sum(Century, na.rm=T)) %>% ggplot(aes(x=year, y=total_runs))+geom_line(group=1, col='steelblue')
+```
+
+
+```{r, fig.width=12}
+odi %>% filter(Player %in% head(top_players$Player, 5)) %>% group_by(Player, year) %>% summarise(total_runs=sum(Runs, na.rm=T)) %>% ggplot(aes(x=year, y=total_runs, col=Player))+geom_line(group=1) 
+```
+
+## Heatmaps
+- Categorical vs Categorical
+```{r, fig.width=11}
+hr %>% group_by(JobRole, EducationField) %>% summarise(count=n()) %>% ggplot(aes(x=JobRole, y=EducationField, fill=-count))+geom_tile()
+```
+
+## Multivariate Analysis
+### Scatter Plot
+```{r, fig.width=11}
+parliament = read.csv('e:/datasets/parliament.csv')
+
+summary_2009 = parliament %>% filter(YEAR==2009, STATE=='KARNATAKA', PC=='BANGALORE CENTRAL')
+
+summary_2009 %>% group_by(NAME) %>% summarise(per_votes=VOTES/sum(summary_2009$VOTES)*100) %>% arrange(-per_votes)
+
+parliament %>% filter(YEAR==2009, Position==1) %>% group_by(PARTY) %>% summarise(wins=n()) %>% arrange(-wins) %>% head(10)
+
+party_wins = parliament %>% filter(Position==1) %>% group_by(YEAR, PARTY) %>% summarise(wins=n())
+head(party_wins, 20)
+
+
+top_parties = party_wins %>% group_by(PARTY) %>% summarise(wins=sum(wins)) %>% arrange(-wins) %>% head(5)
+party_wins$YEAR = as.factor(party_wins$YEAR)
+ggplot(party_wins %>% filter(PARTY %in% top_parties$PARTY), aes(x=YEAR, y=wins, fill=PARTY))+geom_bar(stat='identity', position = 'stack')
+```
+
+```{r, fig.width=11, fig.height=4}
+ggplot(party_wins %>% filter(PARTY %in% top_parties$PARTY), aes(x=YEAR, y=wins, fill=PARTY))+geom_bar(stat='identity', position = 'fill')
+```
+
+```{r, fig.width=10, fig.height=6}
+library(treemap)
+
+players_summary = odi %>% group_by(Player) %>% summarise(total_runs=sum(Runs, na.rm=T), avg_rate=mean(ScoreRate, na.rm=T), Country=first(Country), centuries=sum(Century, na.rm=T)) %>% arrange(-total_runs) %>% head(100)
+treemap(players_summary,
+        index = c('Country','Player'),
+        vSize = 'total_runs',
+        vColor = 'centuries',
+        type='value'
+        )
+
+
+```
+
+```{r}
+
+```
+

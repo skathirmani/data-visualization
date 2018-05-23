@@ -1,0 +1,101 @@
+---
+title: "Untitled"
+runtime: shiny
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(ggplot2)
+library(dplyr)
+```
+Sidebar {.sidebar}
+==============================
+```{r}
+fileInput(inputId = 'file_info', label='Upload a CSV file')
+textInput(inputId='test', label='')
+dateRangeInput(inputId = 'select_date', label='Select Range')
+
+```
+
+Data Preview
+===============================
+
+Row
+-----------------------------
+### Data Preview
+```{r}
+tableOutput('data_preview')
+```
+
+Numerical
+==================================
+
+
+### `r renderText({input$test})`
+```{r}
+fluidRow(column(3), 
+         uiOutput('num_cols'))
+```
+
+Row
+------------------------------
+
+### Boxplot
+```{r}
+plotOutput('boxplot')
+```
+
+Row
+------------------------
+### Histogram
+
+```{r}
+plotOutput('histogram')
+```
+
+
+```{r}
+observe({
+ if (is.null(input$file_info))
+      return(NULL) 
+ df = read.csv(input$file_info$datapath)
+ output$data_preview = renderTable({
+   df %>% head(5)
+ })
+ 
+ num_cols = colnames(df)[sapply(df, is.numeric)]
+ output$num_cols = renderUI({
+   selectInput(inputId = 'input_num_col', label='Select a numerical column',
+               choices = num_cols)
+ })
+ 
+ output$boxplot = renderPlot({
+   boxplot(df[,input$input_num_col])
+ })
+ output$histogram = renderPlot({
+   hist(df[,input$input_num_col])
+ })
+})
+```
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+#if (is.null(input$metadata))
+#      return(NULL)
+
+```
+
