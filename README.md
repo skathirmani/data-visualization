@@ -18,6 +18,7 @@ Code files and references for data visualization
 - [Color pallete cheat sheet in R](https://www.nceas.ucsb.edu/~frazier/RSpatialGuides/colorPaletteCheatsheet.pdf)
 - [ggplot2 handbook](https://ggplot2-book.org/)
 - [ggplot2 cheatsheet](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
+- [Plots using ggplot2](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html)
 
 
 
