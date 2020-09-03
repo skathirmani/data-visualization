@@ -14,6 +14,10 @@ Code files and references for data visualization
 
 ### References
 
+- Data Wrangling in R
+  - [Data wrangling with R](https://cengel.github.io/R-data-wrangling/)
+  - [Data wrangling with R & R Studio](https://rstudio.com/resources/webinars/data-wrangling-with-r-and-rstudio/)
+  - [Introduction to Data Exploration and Analysis with R](https://bookdown.org/mikemahoney218/IDEAR/)
 - [Boxplot(Wikipedia)](https://en.wikipedia.org/wiki/Box_plot)
 - [Color pallete cheat sheet in R](https://www.nceas.ucsb.edu/~frazier/RSpatialGuides/colorPaletteCheatsheet.pdf)
 - [ggplot2 handbook](https://ggplot2-book.org/)
