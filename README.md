@@ -16,6 +16,9 @@ Code files and references for data visualization
 
 - [Boxplot(Wikipedia)](https://en.wikipedia.org/wiki/Box_plot)
 - [Color pallete cheat sheet in R](https://www.nceas.ucsb.edu/~frazier/RSpatialGuides/colorPaletteCheatsheet.pdf)
+- [ggplot2 handbook](https://ggplot2-book.org/)
+- [ggplot2 cheatsheet](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
+
 
 
 
